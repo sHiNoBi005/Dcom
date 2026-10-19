@@ -28,7 +28,65 @@ string randomBitsWithZero(int size, int zero){
     return s;
 }
 
+vector<double> readAnalogSamples() {
+    int n;
+    cout << "Enter no of sample points" << endl;
+    cin >> n;
 
+    vector<double> samples(n);
+    cout << "Enter Samples" << endl;
+    for (auto x : samples)
+        cin >> x;
+
+    return samples;
+}
+
+ // Need to be studied
+ string longestPalindrome(string s) {
+        if (s.empty()) {
+            return "";
+        }
+
+        string transformed = "^";
+        for (char ch : s) {
+            transformed += '#';
+            transformed += ch;
+        }
+        transformed += "#$";
+
+        int n = static_cast<int>(transformed.size());
+        vector<int> radius(n, 0);
+        int center = 0;
+        int right = 0;
+        int bestCenter = 0;
+        int bestRadius = 0;
+
+        for (int i = 1; i < n - 1; i++) {
+            int mirror = 2 * center - i;
+
+            if (i < right) {
+                radius[i] = min(right - i, radius[mirror]);
+            }
+
+            while (transformed[i + 1 + radius[i]]
+                   == transformed[i - 1 - radius[i]]) {
+                radius[i]++;
+            }
+
+            if (i + radius[i] > right) {
+                center = i;
+                right = i + radius[i];
+            }
+
+            if (radius[i] > bestRadius) {
+                bestRadius = radius[i];
+                bestCenter = i;
+            }
+        }
+
+        int start = (bestCenter - bestRadius) / 2;
+        return s.substr(start, bestRadius);
+    }
 
 void DigitalDataHandler(){
     int n;
@@ -68,10 +126,11 @@ int main(){
         dashboard();
         int option;
         cin >> option;
+        vector<double> sample;
         switch(option){
             case 1: DigitalDataHandler();
             break;
-            case 2: cout << 2 << endl;
+            case 2: sample = readAnalogSamples();
             break;
             case 3: return 0;
             break;
