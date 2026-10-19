@@ -1,10 +1,5 @@
-#include<iostream>
-#include<vector>
-#include<random>
-#include<string>
-#include<ctime>
-#include<cstdlib>
-
+#include "SignalHandler.h"
+#include "PCM.h"
 using namespace std;
 
 string RandomBits(int size){
@@ -35,7 +30,7 @@ vector<double> readAnalogSamples() {
 
     vector<double> samples(n);
     cout << "Enter Samples" << endl;
-    for (auto x : samples)
+    for (double& x : samples)
         cin >> x;
 
     return samples;
@@ -127,10 +122,13 @@ int main(){
         int option;
         cin >> option;
         vector<double> sample;
+        string pcm_bits;
         switch(option){
             case 1: DigitalDataHandler();
             break;
             case 2: sample = readAnalogSamples();
+                    pcm_bits = PCM_Modulation(sample);
+                    cout << pcm_bits << endl;
             break;
             case 3: return 0;
             break;
