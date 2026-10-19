@@ -1,5 +1,6 @@
 #include "SignalHandler.h"
 #include "PCM.h"
+#include "LineEncoding.h"
 using namespace std;
 
 string RandomBits(int size){
@@ -93,11 +94,11 @@ void DigitalDataHandler(){
     int choice;
     cin >> choice;
     switch(choice){
-        case 1: cout<< RandomBits(n) << endl;
+        case 1: EncodingDashboard(RandomBits(n));
         break;
-        case 2: cout << randomBitsWithZero(n,4) <<endl;
+        case 2: EncodingDashboard(randomBitsWithZero(n,4));
         break;
-        case 3: cout << randomBitsWithZero(n,8) <<endl;
+        case 3: EncodingDashboard(randomBitsWithZero(n,8));
         break;
         default: cout << "Enter a valid choice\n";
     }

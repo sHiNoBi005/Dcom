@@ -1,13 +1,11 @@
-#include <iostream>
-#include <string>
-#include <vector>
+#include "LineEncoding.h"
 using namespace std;
 
-vector<int> signal;
+vector<int> encodeSignal;
 void NRZ_L(string bitstream)
 {
     for (char bit : bitstream)
-        signal.push_back(bit == '0' ? 1 : -1);
+        encodeSignal.push_back(bit == '0' ? 1 : -1);
 }
 
 void NRZ_I(string bitstream)
@@ -19,7 +17,7 @@ void NRZ_I(string bitstream)
         {
             level = -level;
         }
-        signal.push_back(level);
+        encodeSignal.push_back(level);
     }
 }
 
@@ -28,11 +26,11 @@ void Manchester(const string& bits) {
     for (char bit : bits) {
        
         if (bit == '0') {
-            signal.push_back(1);
-            signal.push_back(-1);
+            encodeSignal.push_back(1);
+            encodeSignal.push_back(-1);
         } else {
-            signal.push_back(-1);
-            signal.push_back(1);
+            encodeSignal.push_back(-1);
+            encodeSignal.push_back(1);
         }
     }
 }
@@ -48,11 +46,11 @@ void DiffManchester(const string& bits) {
             level = -level;
         }
 
-        signal.push_back(level);
+        encodeSignal.push_back(level);
 
         // Mandatory transition in the middle of every bit
         level = -level;
-        signal.push_back(level);
+        encodeSignal.push_back(level);
     }
 }
 
@@ -71,15 +69,15 @@ void AMI_Dashboard(string bitstream) {
 
     switch (choice) {
         case 1:
-            signal = AMI(bitstream);
+            AMI(bitstream);
             break;
 
         case 2:
-            signal = B8ZS(bitstream);
+            B8ZS(bitstream);
             break;
 
         case 3:
-            signal = HDB3(bitstream);
+            HDB3(bitstream);
             break;
 
         case 4:
@@ -91,24 +89,22 @@ void AMI_Dashboard(string bitstream) {
     }
 }
 
-vector<int> AMI(const string& bits) {
+void AMI(const string& bits) {
     
     int lastPulse = -1;
 
     for (char bit : bits) {
         if (bit == '0') {
-            signal.push_back(0);
+            encodeSignal.push_back(0);
         } else {
             lastPulse = -lastPulse;
-            signal.push_back(lastPulse);
+            encodeSignal.push_back(lastPulse);
         }
     }
-
-    return signal;
 }
 
 // Bipolar with 8-Zero Substitution
-vector<int> B8ZS(const string& bits) {
+void B8ZS(const string& bits) {
     
     int lastPulse = -1;
     size_t i = 0;
@@ -128,7 +124,7 @@ vector<int> B8ZS(const string& bits) {
             };
 
             for (int level : pattern) {
-                signal.push_back(level);
+                encodeSignal.push_back(level);
             }
 
             // The final pulse has polarity p.
@@ -136,69 +132,50 @@ vector<int> B8ZS(const string& bits) {
             i += 8;
         } else {
             if (bits[i] == '0') {
-                signal.push_back(0);
+                encodeSignal.push_back(0);
             } else {
                 lastPulse = -lastPulse;
-                signal.push_back(lastPulse);
+                encodeSignal.push_back(lastPulse);
             }
 
             ++i;
         }
     }
-
-    return signal;
 }
 
-vector<int> HDB3(const string& bits) {
- 
+void HDB3(const string& bits) {
     int lastPulse = -1;
     int pulseCount = 0;
     size_t i = 0;
 
     while (i < bits.size()) {
-        // Substitute each group of four consecutive zeros
-        if (bits[i] == '0' && i + 4 <= bits.size()
-            && bits.substr(i, 4) == "0000") {
+        if (i + 4 <= bits.size() &&
+            bits.substr(i, 4) == "0000") {
 
             if (pulseCount % 2 == 1) {
-                // Odd pulse count: 000V
-                // V has the same polarity as the preceding pulse.
-                signal.push_back(0);
-                signal.push_back(0);
-                signal.push_back(0);
-                signal.push_back(lastPulse);
+                // Odd number of pulses: 000V
+                encodeSignal.insert(encodeSignal.end(), {0, 0, 0, lastPulse});
             } else {
-                // Even pulse count: B00V
-                // B is a normal AMI pulse; V repeats its polarity.
+                // Even number of pulses: B00V
                 int B = -lastPulse;
-
-                signal.push_back(B);
-                signal.push_back(0);
-                signal.push_back(0);
-                signal.push_back(B);
-
+                encodeSignal.insert(encodeSignal.end(), {B, 0, 0, B});
                 lastPulse = B;
             }
 
-            // The final substitution pulse is V.
-            // Restart the count after a substitution.
-            lastPulse = signal.back();
+            lastPulse = encodeSignal.back();
             pulseCount = 0;
             i += 4;
         } else {
             if (bits[i] == '0') {
-                signal.push_back(0);
+                encodeSignal.push_back(0);
             } else {
                 lastPulse = -lastPulse;
-                signal.push_back(lastPulse);
+                encodeSignal.push_back(lastPulse);
                 pulseCount++;
             }
-
-            ++i;
+            i++;
         }
     }
-
-    return signal;
 }
 
 void EncodingDashboard(string bitstream)
@@ -232,7 +209,7 @@ void EncodingDashboard(string bitstream)
         DiffManchester(bitstream);
         break;
     case 5:
-        AMI(bitstream);
+        AMI_Dashboard(bitstream);
         break;
     default:
         break;
