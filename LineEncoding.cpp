@@ -6,6 +6,8 @@ void NRZ_L(string bitstream)
 {
     for (char bit : bitstream)
         encodeSignal.push_back(bit == '0' ? 1 : -1);
+        
+            
 }
 
 void NRZ_I(string bitstream)
@@ -19,6 +21,7 @@ void NRZ_I(string bitstream)
         }
         encodeSignal.push_back(level);
     }
+   
 }
 
 void Manchester(const string& bits) {
@@ -180,6 +183,8 @@ void HDB3(const string& bits) {
 
 void EncodingDashboard(string bitstream)
 {
+    encodeSignal.clear();
+    
     cout << "\n";
     cout << "============================================\n";
     cout << "           LINE ENCODING TECHNIQUES\n";
@@ -215,3 +220,4 @@ void EncodingDashboard(string bitstream)
         break;
     }
 }
+

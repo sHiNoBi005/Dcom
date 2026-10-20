@@ -29,7 +29,7 @@ string PCM_Modulation(vector<double>& sample){
     for (double x : sample) {
         int index = static_cast<int>((x - v_min) / height);
         index = max(0, min(7, index));
-        cout << bitset<3>(index).to_string();
+        
         bitstream += bitset<3>(index).to_string();
     }
     return bitstream;

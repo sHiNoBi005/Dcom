@@ -1,3 +1,4 @@
+#include "plot.h"
 #include "SignalHandler.h"
 #include "PCM.h"
 #include "LineEncoding.h"
@@ -21,6 +22,7 @@ string randomBitsWithZero(int size, int zero){
     for(int i=pos; i<(pos + zero); i++){
         s[i] = '0';
     }
+    
     return s;
 }
 
@@ -93,15 +95,22 @@ void DigitalDataHandler(){
     cout << "3. Include 8 consecutive zeros\n";
     int choice;
     cin >> choice;
+    string bits;
     switch(choice){
-        case 1: EncodingDashboard(RandomBits(n));
+        case 1: bits=RandomBits(n);
         break;
-        case 2: EncodingDashboard(randomBitsWithZero(n,4));
+        case 2: bits=randomBitsWithZero(n,4);
         break;
-        case 3: EncodingDashboard(randomBitsWithZero(n,8));
+        case 3: bits=randomBitsWithZero(n,8);
         break;
         default: cout << "Enter a valid choice\n";
     }
+    cout<<"bits generated : "<<bits<<endl;
+    cout<<"longest pallindrome present here : "<<longestPalindrome(bits)<<endl;
+    EncodingDashboard(bits);
+    if (!encodeSignal.empty())
+        plotSignal(encodeSignal, encodeSignal.size() / bits.size());
+
 }
 
 void dashboard(){
@@ -130,6 +139,10 @@ int main(){
             case 2: sample = readAnalogSamples();
                     pcm_bits = PCM_Modulation(sample);
                     cout << pcm_bits << endl;
+                    EncodingDashboard(pcm_bits);
+                     if (!encodeSignal.empty())
+        plotSignal(encodeSignal, encodeSignal.size() / pcm_bits.size());
+
             break;
             case 3: return 0;
             break;
