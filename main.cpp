@@ -93,6 +93,7 @@ void DigitalDataHandler(){
     cout << "1. Fully Random \n";
     cout << "2. Include 4 consecutive zeros\n";
     cout << "3. Include 8 consecutive zeros\n";
+    cout << "4. Enter manually\n";
     int choice;
     cin >> choice;
     string bits;
@@ -103,6 +104,9 @@ void DigitalDataHandler(){
         break;
         case 3: bits=randomBitsWithZero(n,8);
         break;
+        case 4: cout << "Enter the bit stream: ";
+                cin >> bits;
+                break;
         default: cout << "Enter a valid choice\n";
     }
     cout<<"bits generated : "<<bits<<endl;
@@ -138,7 +142,7 @@ int main(){
             break;
             case 2: sample = readAnalogSamples();
                     pcm_bits = PCM_Modulation(sample);
-                    cout << pcm_bits << endl;
+                    cout << "PCM bits: " << pcm_bits << endl;
                     EncodingDashboard(pcm_bits);
                      if (!encodeSignal.empty())
         plotSignal(encodeSignal, encodeSignal.size() / pcm_bits.size());
