@@ -44,7 +44,7 @@ static void drawGrid(int bits, int samp_per_bit) {
     glEnd();
 }
 
-static void drawSignal(const std::vector<int>& levels, int samp_per_bit) {
+static void drawSignal(const std::vector<double>& levels, int samp_per_bit) {
     glColor3f(0.0f, 0.6f, 0.0f);
     glLineWidth(3.0f);
     glBegin(GL_LINE_STRIP);
@@ -57,7 +57,7 @@ static void drawSignal(const std::vector<int>& levels, int samp_per_bit) {
     glEnd();
 }
 
-void plotSignal(const std::vector<int>& levels, int samp_per_bit) {
+void plotSignal(const std::vector<double>& levels, int samp_per_bit) {
     int bits = levels.size() / samp_per_bit;
     int width = std::min(1800, std::max(800, bits * 40));
 
@@ -87,4 +87,8 @@ void plotSignal(const std::vector<int>& levels, int samp_per_bit) {
 
     glfwDestroyWindow(win);
     glfwTerminate();
+}
+void plotSignal(const std::vector<int>& levels, int samplesPerBit) {
+    std::vector<double> converted(levels.begin(), levels.end());
+    plotSignal(converted, samplesPerBit);
 }
