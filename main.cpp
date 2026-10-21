@@ -26,6 +26,15 @@ string randomBitsWithZero(int size, int zero){
     return s;
 }
 
+void validateBitStream(string& bits){
+    for(char c: bits){
+        if(c != '0' && c != '1'){
+            cout << "Invalid bit stream. Only 0s and 1s are allowed." << endl;
+            exit(0);
+        }
+    }
+}
+
 vector<double> readAnalogSamples() {
     int n;
     cout << "Enter no of sample points" << endl;
@@ -106,6 +115,7 @@ void DigitalDataHandler(){
         break;
         case 4: cout << "Enter the bit stream: ";
                 cin >> bits;
+                validateBitStream(bits);
                 break;
         default: cout << "Enter a valid choice\n";
     }
