@@ -127,40 +127,198 @@ void DigitalDataHandler(){
 
 }
 
-void dashboard(){
+void dashboard()
+{
+    cout << "\n";
     cout << "============================================\n";
     cout << "       DIGITAL SIGNAL ENCODER/DECODER\n";
     cout << "============================================\n";
     cout << "1. Digital Data Generation\n";
-    cout << "2. Analog Data Generation\n";
-    cout << "3. Exit\n";
+    cout << "2. Analog Data Generation (PCM Encoder)\n";
+    cout << "3. PCM Decoder\n";
+    cout << "4. Exit\n";
     cout << "============================================\n";
+    cout << "Enter your choice: ";
+}
+
+// Store the most recent PCM encoding for later decoding.
+string last_pcm_bits;
+double last_pcm_min = 0.0;
+double last_pcm_max = 0.0;
+bool pcm_data_available = false;
+
+void PCMDemodulationDashboard()
+{
+    cout << "\n";
+    cout << "============================================\n";
+    cout << "                 PCM DECODER\n";
+    cout << "============================================\n";
+    cout << "1. Decode last PCM encoded signal\n";
+    cout << "2. Enter PCM bitstream manually\n";
+    cout << "3. Return to main menu\n";
+    cout << "============================================\n";
+    cout << "Enter your choice: ";
+
+    int choice;
+    cin >> choice;
+
+    string bits;
+    double v_min, v_max;
+
+    switch (choice)
+    {
+        case 1:
+            if (!pcm_data_available)
+            {
+                cout << "No previous PCM encoding found.\n";
+                cout << "Encode analog samples first.\n";
+                return;
+            }
+
+            bits = last_pcm_bits;
+            v_min = last_pcm_min;
+            v_max = last_pcm_max;
+            break;
+
+        case 2:
+            cout << "Enter PCM bitstream: ";
+            cin >> bits;
+
+            if (bits.empty() || bits.size() % 3 != 0)
+            {
+                cout << "Invalid PCM stream. "
+                     << "Its length must be a multiple of 3.\n";
+                return;
+            }
+
+            for (char bit : bits)
+            {
+                if (bit != '0' && bit != '1')
+                {
+                    cout << "Only 0s and 1s are allowed.\n";
+                    return;
+                }
+            }
+
+            cout << "Enter original minimum amplitude: ";
+            cin >> v_min;
+
+            cout << "Enter original maximum amplitude: ";
+            cin >> v_max;
+
+            if (!cin || v_min > v_max)
+            {
+                cout << "Invalid amplitude range.\n";
+                return;
+            }
+            break;
+
+        case 3:
+            return;
+
+        default:
+            cout << "Invalid choice.\n";
+            return;
+    }
+
+    vector<double> reconstructed =
+        PCM_Demodulation(bits, v_min, v_max);
+
+    if (reconstructed.empty())
+    {
+        cout << "Decoding failed or bitstream is empty.\n";
+        return;
+    }
+
+    cout << "\nPCM bitstream: " << bits << "\n";
+    cout << "Reconstructed samples:\n";
+
+    for (double value : reconstructed)
+    {
+        cout << value << " ";
+    }
+
+    cout << "\n";
+
+    cout << "Plotting reconstructed signal...\n";
+    plotSignal(reconstructed, 1);
 }
 
 
-int main(){
+int main()
+{
+    srand(static_cast<unsigned int>(time(nullptr)));
+
     while (true)
     {
-        srand(time(0));
         dashboard();
-        int option;
-        cin >> option;
-        vector<double> sample;
-        string pcm_bits;
-        switch(option){
-            case 1: DigitalDataHandler();
-            break;
-            case 2: sample = readAnalogSamples();
-                    pcm_bits = PCM_Modulation(sample);
-                    cout << "PCM bits: " << pcm_bits << endl;
-                    EncodingDashboard(pcm_bits);
-                     if (!encodeSignal.empty())
-        plotSignal(encodeSignal, encodeSignal.size() / pcm_bits.size());
 
-            break;
-            case 3: return 0;
-            break;
-            default: cout << "Enter a valid input";
+        int option;
+        if (!(cin >> option))
+            return 0;
+
+        vector<double> sample;
+
+        switch (option)
+        {
+            case 1:
+                DigitalDataHandler();
+                break;
+
+            case 2:
+            {
+                sample = readAnalogSamples();
+
+                if (sample.empty())
+                {
+                    cout << "No samples to encode.\n";
+                    break;
+                }
+
+                last_pcm_min =
+                    *min_element(sample.begin(), sample.end());
+                last_pcm_max =
+                    *max_element(sample.begin(), sample.end());
+
+                last_pcm_bits = PCM_Modulation(sample);
+                pcm_data_available = !last_pcm_bits.empty();
+
+                cout << "\nPCM bits: "
+                     << last_pcm_bits << "\n";
+
+                cout << "PCM encoding completed.\n";
+
+                cout << "\nDo you want to apply line encoding? (1 = Yes, 0 = No): ";
+                int line_choice;
+                cin >> line_choice;
+
+                if (line_choice == 1)
+                {
+                    EncodingDashboard(last_pcm_bits);
+
+                    if (!encodeSignal.empty())
+                    {
+                        plotSignal(
+                            encodeSignal,
+                            encodeSignal.size() /
+                            last_pcm_bits.size());
+                    }
+                }
+
+                cout << "\nYou can select option 3 to decode this PCM stream.\n";
+                break;
+            }
+
+            case 3:
+                PCMDemodulationDashboard();
+                break;
+
+            case 4:
+                cout << "Exiting program.\n";
+                return 0;
+
+            default:
+                cout << "Enter a valid input.\n";
         }
     }
 return 0;

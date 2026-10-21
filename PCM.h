@@ -13,4 +13,9 @@ using namespace std;
 
 string PCM_Modulation(vector<double>& sample);
 
+vector<double> PCM_Demodulation(
+    const string& bitstream,
+    double v_min,
+    double v_max);
+
 #endif
